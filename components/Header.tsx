@@ -30,7 +30,7 @@ function Header() {
           CIT Official Site
         </Link>
         <Link
-          href="https://links.papareact.com/microsoft-youtube-build"
+          href="https://github.com/aAYUSHkujur/ai-image-generator"
           className="px-2 font-light"
         >
           Github Repo
