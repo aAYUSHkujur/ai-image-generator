@@ -1,8 +1,10 @@
 "use client";
 
+import fetchImages from "@/lib/fetchImages";
 import fetchSuggestionFromChatGPT from "@/lib/fetchSuggestionFromChatGPT";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import useSWR from "swr";
+import toast from "react-hot-toast";
 
 function PromptInput() {
   const [input, setInput] = useState("");
@@ -16,11 +18,64 @@ function PromptInput() {
     revalidateOnFocus: false,
   });
 
+  const { mutate: updateImages } = useSWR("images", fetchImages, {
+    revalidateOnFocus: false,
+  });
+
+  const submitPrompt = async (useSuggestion?: boolean) => {
+    const inputPrompt = input;
+    setInput("");
+    console.log(inputPrompt);
+
+    
+    // p is the prompt to send to API
+    const p = useSuggestion ? suggestion : inputPrompt;
+    
+    const notificationPrompt = p;
+    const notificationPromptShort = notificationPrompt.slice(0, 20);
+
+    const notification = toast.loading(
+      `DALL·E is creating: ${notificationPromptShort}...`
+    );
+
+    const res = await fetch("/api/generateImage", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prompt: p,
+      }),
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      toast.error(data.error, {
+        id: notification,
+      });
+    } else {
+      toast.success(`Your AI Art has been Generated!`, {
+        id: notification,
+      });
+    }
+
+    updateImages();
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    await submitPrompt();
+  };
+
   const loading = isValidating || isLoading;
 
   return (
     <div className="m-10">
-      <form className="flex flex-col lg:flex-row shadow-md shadow-slate-400/10 border rounded-md lg:divide-x">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col lg:flex-row shadow-md shadow-slate-400/10 border rounded-md lg:divide-x"
+      >
         <textarea
           className="flex-1 p-4 outline-none rounded-md"
           placeholder={
@@ -45,6 +100,7 @@ function PromptInput() {
         <button
           className="p-4 bg-violet-400 text-white transition-colors duration-200 font-bold disabled:text-gray-300 disabled:cursor-not-allowed disabled:bg-gray-400"
           type="button"
+          onClick={() => submitPrompt(true)}
         >
           Use Suggestion
         </button>
