@@ -1,6 +1,6 @@
 export async function GET(request: Request) {
     const response = await fetch(
-        "https://cit-image-generator.azurewebsites.net/api/getimages",
+        `${process.env.GET_IMAGES_URL}`,
         {
             cache: "no-store",
         }

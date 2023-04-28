@@ -4,7 +4,7 @@ export async function POST(request: Request) {
     const res = await request.json(); // res now contains body
     const prompt = res.prompt;
 
-    const response = await fetch("https://cit-image-generator.azurewebsites.net/api/generateimage", {
+    const response = await fetch(`${process.env.GENERATE_IMAGE_URL}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
